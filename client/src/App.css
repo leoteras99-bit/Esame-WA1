@@ -1,0 +1,297 @@
+#root {
+  min-height: 100vh;
+}
+
+.appShell {
+  min-height: 100vh;
+}
+
+.topbar {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  background: #0f172a;
+  color: #ffffff;
+  border-bottom: 4px solid #38bdf8;
+}
+
+.brandButton,
+.topbar nav button {
+  border: 0;
+  color: inherit;
+  background: transparent;
+}
+
+.brandButton {
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 10px;
+}
+
+.topbar nav button {
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.topbar nav button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.page {
+  width: min(1220px, calc(100% - 48px));
+  margin: 24px auto;
+}
+
+.playGrid {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.narrow {
+  width: 460px;
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #d6dee8;
+  border-radius: 8px;
+  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.08);
+  padding: 22px;
+}
+
+.controlsPanel {
+  position: sticky;
+  top: 84px;
+}
+
+h1 {
+  margin: 0 0 14px;
+  color: #111827;
+  font-size: 26px;
+  line-height: 1.15;
+}
+
+p {
+  margin: 0;
+}
+
+.form {
+  display: grid;
+  gap: 14px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+input,
+select {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #111827;
+  background: #ffffff;
+  padding: 10px 12px;
+}
+
+.primary {
+  border: 0;
+  border-radius: 6px;
+  background: #0369a1;
+  color: white;
+  font-weight: 800;
+  padding: 11px 14px;
+}
+
+.primary:hover:not(:disabled) {
+  background: #075985;
+}
+
+.modeSwitch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.modeSwitch button {
+  border: 0;
+  background: #f8fafc;
+  padding: 10px;
+  font-weight: 800;
+  color: #475569;
+}
+
+.modeSwitch button.active {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.difficultyBox {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.difficultyBox span,
+.fleetRow span {
+  border-radius: 6px;
+  background: #eef6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
+  padding: 8px 10px;
+  font-weight: 800;
+}
+
+.muted {
+  color: #64748b;
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+.notice {
+  width: min(1220px, calc(100% - 48px));
+  margin: 16px auto 0;
+  border-radius: 7px;
+  padding: 12px 14px;
+  font-weight: 800;
+}
+
+.error {
+  color: #991b1b;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+.matchHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.matchHeader p {
+  color: #475569;
+}
+
+.statusBadge {
+  min-width: 132px;
+  text-align: center;
+  border-radius: 6px;
+  color: #ffffff;
+  background: #0369a1;
+  padding: 10px 12px;
+  font-weight: 900;
+}
+
+.statusBadge.won {
+  background: #15803d;
+}
+
+.statusBadge.lost {
+  background: #b91c1c;
+}
+
+.fleetRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.fleetRow .sunkShip {
+  color: #7f1d1d;
+  background: #fee2e2;
+  border-color: #fecaca;
+  text-decoration: line-through;
+}
+
+.board {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  max-width: 760px;
+  aspect-ratio: 1;
+  padding: 8px;
+  background: #0f172a;
+  border-radius: 8px;
+}
+
+.cell {
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 4px;
+  background: #bae6fd;
+  color: #082f49;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.cell:hover:not(:disabled) {
+  background: #7dd3fc;
+}
+
+.cell.water {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.cell.hit {
+  background: #f97316;
+  color: #ffffff;
+}
+
+.cell.sunk {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.cell.revealed {
+  background: #64748b;
+  color: #ffffff;
+}
+
+.emptyBoard {
+  display: grid;
+  place-items: center;
+  min-height: 460px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 8px;
+  color: #64748b;
+  font-weight: 800;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 12px;
+  text-align: left;
+}
+
+th {
+  color: #334155;
+  background: #f8fafc;
+  font-size: 13px;
+  text-transform: uppercase;
+}

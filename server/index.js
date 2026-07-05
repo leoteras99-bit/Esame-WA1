@@ -90,15 +90,15 @@ function loadMatchForRequest(req, id) {
     return req.session.matches?.[id] ?? null;
 }
 
-function saveMatchForRequest(req, match) {
+/*function saveMatchForRequest(req, match) {
   /*if (String(match.id).startsWith('anon-')) {
     rememberAnonymousMatch(req, match);
   } else {
     //completare la gestione del match in sessione e non più in db
     //updateMatch(match.id, match.state);
-  }*/
+  }
   rememberMatch(req, match);
-}
+}*/
 
 app.get('/api/session', (req, res) => {
   res.json({ user: req.user ?? null });
@@ -190,7 +190,7 @@ app.post('/api/matches/:id/shots', (req, res) => {
   if (result.status != "playing" && req.user){
     updateMatch(match.id, match.state);
   }
-  saveMatchForRequest(req, match);
+  rememberMatch(req, match);
   res.json({ ...result, match: publicMatch(match) });
 });
 

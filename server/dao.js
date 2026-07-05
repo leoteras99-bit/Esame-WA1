@@ -48,7 +48,6 @@ export function initializeDatabase() {
       difficulty TEXT NOT NULL,
       tournament_code TEXT,
       status TEXT NOT NULL,
-      state_json TEXT NOT NULL,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       completed_at TEXT,
       FOREIGN KEY(user_id) REFERENCES users(id),
@@ -88,7 +87,7 @@ function seedDatabase() {
 }
 
 function insertSeedResult(userId, difficulty, status) {
-  const state = {
+  /*const state = {
     difficulty,
     size: difficulty === 'Hard' ? 15 : difficulty === 'Intermediate' ? 10 : 5,
     torpedoes: status === 'won' ? 4 : 0,
@@ -97,12 +96,12 @@ function insertSeedResult(userId, difficulty, status) {
     ships: [],
     shots: [],
     status,
-  };
+  };*/
 
   db.prepare(`
-    INSERT INTO matches (user_id, mode, difficulty, status, state_json, completed_at)
-    VALUES (?, 'casual', ?, ?, ?, CURRENT_TIMESTAMP)
-  `).run(userId, difficulty, status, JSON.stringify(state));
+    INSERT INTO matches (user_id, mode, difficulty, status, completed_at)
+    VALUES (?, 'casual', ?, ?, CURRENT_TIMESTAMP)
+  `).run(userId, difficulty, status);
 }
 
 export function getUserByUsername(username) {
@@ -126,9 +125,9 @@ export function getTournament(code) {
 
 export function createStoredMatch({ userId = null, mode, difficulty, tournamentCode = null, state }) {
   const result = db.prepare(`
-    INSERT INTO matches (user_id, mode, difficulty, tournament_code, status, state_json)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).run(userId, mode, difficulty, tournamentCode, state.status, JSON.stringify(state));
+    INSERT INTO matches (user_id, mode, difficulty, tournament_code, status)
+    VALUES (?, ?, ?, ?, ?)
+  `).run(userId, mode, difficulty, tournamentCode, state.status);
 
   return Number(result.lastInsertRowid);
 }
@@ -138,7 +137,6 @@ export function getMatch(id) {
   if (!row) return null;
   return {
     ...row,
-    state: JSON.parse(row.state_json),
     tournamentCode: row.tournament_code,
   };
 }
@@ -146,9 +144,9 @@ export function getMatch(id) {
 export function updateMatch(id, state) {
   db.prepare(`
     UPDATE matches
-    SET status = ?, state_json = ?, completed_at = CASE WHEN ? <> 'playing' THEN CURRENT_TIMESTAMP ELSE completed_at END
+    SET status = ?, completed_at = CASE WHEN ? <> 'playing' THEN CURRENT_TIMESTAMP ELSE completed_at END
     WHERE id = ?
-  `).run(state.status, JSON.stringify(state), state.status, id);
+  `).run(state.status, state.status, id);
 }
 
 export function getPublicStats() {

@@ -23,6 +23,7 @@ import {
   normalizeDifficulty,
   publicMatch,
 } from './game.js';
+//import {match} from './models.js';
 
 const app = express();
 const PORT = 3001;
@@ -72,27 +73,31 @@ function makeCode() {
   return randomBytes(3).toString('hex').toUpperCase();
 }
 
-function rememberAnonymousMatch(req, match) {
-  req.session.anonymousMatches ??= {};
-  req.session.anonymousMatches[match.id] = match;
+function rememberMatch(req, match) {
+  req.session.matches ??= {};
+  req.session.matches[match.id] = match;
 }
 
 function loadMatchForRequest(req, id) {
-  if (String(id).startsWith('anon-')) {
+  /*if (String(id).startsWith('anon-')) {
     return req.session.anonymousMatches?.[id] ?? null;
-  }
-  const match = getMatch(id);
+  }*/
+  //completare la gestione del match in sessione e non più in db
+ /*const match = getMatch(id);
   if (!match) return null;
   if (match.user_id && (!req.user || match.user_id !== req.user.id)) return 'forbidden';
-  return match;
+  return match;*/
+    return req.session.matches?.[id] ?? null;
 }
 
 function saveMatchForRequest(req, match) {
-  if (String(match.id).startsWith('anon-')) {
+  /*if (String(match.id).startsWith('anon-')) {
     rememberAnonymousMatch(req, match);
   } else {
-    updateMatch(match.id, match.state);
-  }
+    //completare la gestione del match in sessione e non più in db
+    //updateMatch(match.id, match.state);
+  }*/
+  rememberMatch(req, match);
 }
 
 app.get('/api/session', (req, res) => {
@@ -150,19 +155,20 @@ app.post('/api/matches', asyncHandler(async (req, res) => {
   }
 
   if (req.user) {
-    const id = createStoredMatch({
+      const id = createStoredMatch({
       userId: req.user.id,
       mode,
       difficulty: state.difficulty,
       tournamentCode: code,
       state,
     });
-    const match = { id, mode, tournamentCode: code, state };
+    const match = { id, userId: req.user.id, mode, tournamentCode: code, state };
+    rememberMatch(req, match);
     return res.status(201).json(publicMatch(match));
   }
 
   const match = { id: 'anon-' + randomBytes(8).toString('hex'), mode, tournamentCode: null, state };
-  rememberAnonymousMatch(req, match);
+  rememberMatch(req, match);
   return res.status(201).json(publicMatch(match));
 }));
 
@@ -181,6 +187,9 @@ app.post('/api/matches/:id/shots', (req, res) => {
   const row = Number(req.body.row);
   const col = Number(req.body.col);
   const result = launchTorpedo(match.state, row, col);
+  if (result.status != "playing" && req.user){
+    updateMatch(match.id, match.state);
+  }
   saveMatchForRequest(req, match);
   res.json({ ...result, match: publicMatch(match) });
 });

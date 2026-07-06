@@ -13,7 +13,7 @@ import {
   getUserById,
   getUserByUsername,
   initializeDatabase,
-  updateMatch,
+  //updateMatch,
   verifyPassword,
 } from './dao.js';
 import {
@@ -155,19 +155,12 @@ app.post('/api/matches', asyncHandler(async (req, res) => {
   }
 
   if (req.user) {
-      const id = createStoredMatch({
-      userId: req.user.id,
-      mode,
-      difficulty: state.difficulty,
-      tournamentCode: code,
-      state,
-    });
-    const match = new Match(id, req.user.id, mode, code, state);
+    const match = new Match(randomBytes(8).toString('hex'), req.user.id, mode, code, state);
     rememberMatch(req, match);
     return res.status(201).json(publicMatch(match));
   }
 
-  const match = new Match('anon-' + randomBytes(8).toString('hex'), null, mode, null, state);
+  const match = new Match(randomBytes(8).toString('hex'), null, mode, null, state);
   rememberMatch(req, match);
   return res.status(201).json(publicMatch(match));
 }));
@@ -188,7 +181,13 @@ app.post('/api/matches/:id/shots', (req, res) => {
   const col = Number(req.body.col);
   const result = launchTorpedo(match.state, row, col);
   if (result.status != "playing" && req.user){
-    updateMatch(match.id, match.state);
+     const id = createStoredMatch({
+      userId: req.user.id,
+      mode: match.mode,
+      difficulty: match.state.difficulty,
+      tournamentCode: match.tournamentCode,
+      state: match.state,
+    });
   }
   rememberMatch(req, match);
   res.json({ ...result, match: publicMatch(match) });

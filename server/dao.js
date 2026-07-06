@@ -49,7 +49,6 @@ export function initializeDatabase() {
       tournament_code TEXT,
       status TEXT NOT NULL,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      completed_at TEXT,
       FOREIGN KEY(user_id) REFERENCES users(id),
       FOREIGN KEY(tournament_code) REFERENCES tournaments(code)
     );
@@ -99,8 +98,8 @@ function insertSeedResult(userId, difficulty, status) {
   };*/
 
   db.prepare(`
-    INSERT INTO matches (user_id, mode, difficulty, status, completed_at)
-    VALUES (?, 'casual', ?, ?, CURRENT_TIMESTAMP)
+    INSERT INTO matches (user_id, mode, difficulty, status)
+    VALUES (?, 'casual', ?, ?)
   `).run(userId, difficulty, status);
 }
 
@@ -141,13 +140,13 @@ export function getMatch(id) {
   };
 }
 
-export function updateMatch(id, state) {
+/*export function updateMatch(id, state) {
   db.prepare(`
     UPDATE matches
     SET status = ?, completed_at = CASE WHEN ? <> 'playing' THEN CURRENT_TIMESTAMP ELSE completed_at END
     WHERE id = ?
   `).run(state.status, state.status, id);
-}
+}*/
 
 export function getPublicStats() {
   return db.prepare(`

@@ -15,7 +15,7 @@ export function Ship(id, length, orientation) {
     this.length = length;
     this.orientation = orientation;
     //this.cells = cells;
-    this.numberSunk = 0;
+    this.hits = 0;
 
 }
 

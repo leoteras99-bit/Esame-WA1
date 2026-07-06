@@ -170,7 +170,7 @@ export function publicMatch(match, reveal = false) {
 function isShipSunk(state, shipId) {
   const ship = state.ships.find((item) => item.id === shipId);
   //return ship.cells.every(({ row, col }) => state.grid[row][col].shot);
-  return ship.numberSunk === ship.length;
+  return ship.hits === ship.length;
 }
 
 //
@@ -220,7 +220,7 @@ export function launchTorpedo(state, row, col) {
   }else {
     const ship = state.ships.find((ship) => ship.id === cell.shipId);
     result = 'hit';
-    ship.numberSunk += 1;
+    ship.hits += 1;
   }
 
   if (cell.shipId !== null && isShipSunk(state, cell.shipId)) {

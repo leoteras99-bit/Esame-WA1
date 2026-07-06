@@ -1,3 +1,5 @@
+import { Ship } from './models.js';
+
 const DIFFICULTIES = {
   Easy: {
     size: 5,
@@ -99,7 +101,8 @@ function placeShips(size, shipSizes, rng) {
       const cells = cellsForShip(row, col, length, orientation);
 
       if (canPlace(grid, cells)) {
-        ships.push({ id: shipId, length, orientation, cells });
+        const ship = new Ship(shipId, length, orientation);
+        ships.push(ship);
         cells.forEach((cell) => {
           grid[cell.row][cell.col].shipId = shipId;
         });
@@ -166,14 +169,33 @@ export function publicMatch(match, reveal = false) {
 //return true if every cell of ship with id shipId was shot 
 function isShipSunk(state, shipId) {
   const ship = state.ships.find((item) => item.id === shipId);
-  return ship.cells.every(({ row, col }) => state.grid[row][col].shot);
+  //return ship.cells.every(({ row, col }) => state.grid[row][col].shot);
+  return ship.numberSunk === ship.length;
 }
 
 //
 function revealShips(state) {
-  return state.ships.flatMap((ship) =>
-    ship.cells.map((cell) => ({ ...cell, shipId: ship.id, length: ship.length }))
-  );
+  const revealed = [];
+  const shipsById = new Map(state.ships.map(ship => [ship.id, ship]));
+
+  for (let row = 0; row < state.size; row++) {
+    for (let col = 0; col < state.size; col++) {
+      const cell = state.grid[row][col];
+
+      if (cell.shipId !== null) {
+        const ship = shipsById.get(cell.shipId);
+
+        revealed.push({
+          row,
+          col,
+          shipId: ship.id,
+          length: ship.length,
+        });
+      }
+    }
+  }
+
+  return revealed;
 }
 
 export function launchTorpedo(state, row, col) {
@@ -195,11 +217,15 @@ export function launchTorpedo(state, row, col) {
 
   if (cell.shipId === null) {
     state.torpedoes -= 1;
-  } else if (isShipSunk(state, cell.shipId)) {
+  }else {
+    const ship = state.ships.find((ship) => ship.id === cell.shipId);
+    result = 'hit';
+    ship.numberSunk += 1;
+  }
+
+  if (cell.shipId !== null && isShipSunk(state, cell.shipId)) {
     result = 'sunk';
     sunkShip = state.ships.find((ship) => ship.id === cell.shipId);
-  } else {
-    result = 'hit';
   }
 
   if (state.ships.every((ship) => isShipSunk(state, ship.id))) {

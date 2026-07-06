@@ -1,4 +1,5 @@
 import { Ship } from './models.js';
+import { MatchState } from './models.js';
 
 const DIFFICULTIES = {
   Easy: {
@@ -137,16 +138,7 @@ export function createMatchState(difficulty, seed = null) {
   const rng = makeRng(seed);
   const { grid, ships } = placeShips(level.size, level.ships, rng);
 
-  return {
-    difficulty,
-    size: level.size,
-    torpedoes: level.torpedoes,
-    initialTorpedoes: level.torpedoes,
-    grid,
-    ships,
-    shots: [],
-    status: 'playing',
-  };
+  return new MatchState(difficulty, level.size, level.torpedoes, grid, ships);
 }
 
 export function publicMatch(match, reveal = false) {

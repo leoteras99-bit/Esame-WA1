@@ -34,7 +34,6 @@ export function MatchState(difficulty, size, torpedoes, grid, ships) {
     this.difficulty = difficulty;
     this.size = size;
     this.torpedoes = torpedoes;
-    this.initialTorpedoes = initialTorpedoes;
     this.grid = grid;
     this.ships = ships;
     this.shots = [];

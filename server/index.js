@@ -23,7 +23,7 @@ import {
   normalizeDifficulty,
   publicMatch,
 } from './game.js';
-//import {match} from './models.js';
+import {Match} from './models.js';
 
 const app = express();
 const PORT = 3001;
@@ -162,12 +162,12 @@ app.post('/api/matches', asyncHandler(async (req, res) => {
       tournamentCode: code,
       state,
     });
-    const match = { id, userId: req.user.id, mode, tournamentCode: code, state };
+    const match = new Match(id, req.user.id, mode, code, state);
     rememberMatch(req, match);
     return res.status(201).json(publicMatch(match));
   }
 
-  const match = { id: 'anon-' + randomBytes(8).toString('hex'), mode, tournamentCode: null, state };
+  const match = new Match('anon-' + randomBytes(8).toString('hex'), null, mode, null, state);
   rememberMatch(req, match);
   return res.status(201).json(publicMatch(match));
 }));

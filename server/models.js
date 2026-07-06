@@ -20,6 +20,15 @@ export function shot(row, col, result, cell, sunkShip) {
         this.sunkLength = sunkShip?.length ?? null
 }
 
+
+export function  Match(id, userId=null, mode, code, state){
+    this.id = id, 
+    this.userId = userId, 
+    this.mode = mode, 
+    this.tournamentCode = code, 
+    this.state = state;
+}
+
 export function MatchState(difficulty, size, torpedoes, grid, ships) {
     
     this.difficulty = difficulty;

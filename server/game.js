@@ -176,20 +176,14 @@ function isShipSunk(state, shipId) {
 //
 function revealShips(state) {
   const revealed = [];
-  const shipsById = new Map(state.ships.map(ship => [ship.id, ship]));
 
   for (let row = 0; row < state.size; row++) {
     for (let col = 0; col < state.size; col++) {
       const cell = state.grid[row][col];
-
       if (cell.shipId !== null) {
-        const ship = shipsById.get(cell.shipId);
-
         revealed.push({
           row,
           col,
-          shipId: ship.id,
-          length: ship.length,
         });
       }
     }

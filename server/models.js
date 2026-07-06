@@ -1,10 +1,3 @@
-
-export function emptyGrid(size) {
-    return Array.from({ length: size }, () =>
-    Array.from({ length: size }, () => ({ shipId: null, shot: false }))
-  );
-}
-
 export function Cell(){
     this.shipId = null;
     this.shot = false;

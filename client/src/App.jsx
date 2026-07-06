@@ -192,7 +192,7 @@ function PlayPage({ user, setError }) {
               <input value={joinCode} onChange={(event) => setJoinCode(event.target.value.toUpperCase())} placeholder="Leave empty to create" />
             </label>
           )}
-          <button className="primary" type="submit" disabled={busy || (mode === 'tournament' && !user)}>
+          <button className="primary" type="submit" disabled={busy || (mode === 'tournament' && !user) || (match && match.status === 'playing')}>
             {busy ? 'Starting...' : 'Start match'}
           </button>
         </form>
@@ -223,6 +223,7 @@ function MatchHeader({ match, message }) {
     <div className="matchHeader">
       <div>
         <h1>{match ? match.difficulty + ' Match' : 'Ready Room'}</h1>
+        <h1>{match?.tournamentCode || ''}</h1>
         <p>{message}</p>
       </div>
       {match && (

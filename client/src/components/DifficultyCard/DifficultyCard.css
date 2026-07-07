@@ -1,0 +1,15 @@
+.difficultyBox {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.difficultyBox span {
+  border-radius: 6px;
+  background: #eef6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
+  padding: 8px 10px;
+  font-weight: 800;
+}

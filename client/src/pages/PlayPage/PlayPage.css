@@ -1,0 +1,32 @@
+.playGrid {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.controlsPanel {
+  position: sticky;
+  top: 84px;
+}
+
+.modeSwitch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.modeSwitch button {
+  border: 0;
+  background: #f8fafc;
+  padding: 10px;
+  font-weight: 800;
+  color: #475569;
+}
+
+.modeSwitch button.active {
+  background: #0f172a;
+  color: #ffffff;
+}

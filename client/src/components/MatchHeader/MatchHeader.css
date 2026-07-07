@@ -1,0 +1,29 @@
+.matchHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.matchHeader p {
+  color: #475569;
+}
+
+.statusBadge {
+  min-width: 132px;
+  text-align: center;
+  border-radius: 6px;
+  color: #ffffff;
+  background: #0369a1;
+  padding: 10px 12px;
+  font-weight: 900;
+}
+
+.statusBadge.won {
+  background: #15803d;
+}
+
+.statusBadge.lost {
+  background: #b91c1c;
+}

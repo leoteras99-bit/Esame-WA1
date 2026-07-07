@@ -1,0 +1,36 @@
+.topbar {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  background: #0f172a;
+  color: #ffffff;
+  border-bottom: 4px solid #38bdf8;
+}
+
+.brandButton,
+.topbar nav button {
+  border: 0;
+  color: inherit;
+  background: transparent;
+}
+
+.brandButton {
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 10px;
+}
+
+.topbar nav button {
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.topbar nav button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}

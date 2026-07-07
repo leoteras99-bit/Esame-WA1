@@ -1,0 +1,91 @@
+.fleetRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.fleetRow span {
+  border-radius: 6px;
+  background: #eef6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
+  padding: 8px 10px;
+  font-weight: 800;
+}
+
+.fleetRow .sunkShip {
+  color: #7f1d1d;
+  background: #fee2e2;
+  border-color: #fecaca;
+  text-decoration: line-through;
+}
+
+.board {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  max-width: 760px;
+  aspect-ratio: 1;
+  padding: 8px;
+  background: #0f172a;
+  border-radius: 8px;
+}
+
+.cell {
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 4px;
+  background: #bae6fd;
+  color: #082f49;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.cell:hover:not(:disabled) {
+  background: #7dd3fc;
+}
+
+.cell:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.cell:focus {
+  outline: none;
+}
+
+.cell:focus-visible {
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 255, 255, 0.82),
+    0 0 0 2px #0284c7;
+}
+
+.cell.water {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.cell.hit {
+  background: #f97316;
+  color: #ffffff;
+}
+
+.cell.sunk {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.cell.revealed {
+  background: #64748b;
+  color: #ffffff;
+}

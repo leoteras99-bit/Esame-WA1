@@ -1,4 +1,4 @@
-import { DatabaseSync } from 'node:sqlite';
+import sqlite3 from 'sqlite3';
 import { existsSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,8 +9,60 @@ const dbPath = join(__dirname, 'data', 'battleship.sqlite');
 
 mkdirSync(dirname(dbPath), { recursive: true });
 const isNewDatabase = !existsSync(dbPath);
-const db = new DatabaseSync(dbPath);
-db.exec('PRAGMA foreign_keys = ON');
+const sqlite = sqlite3.verbose();
+const db = new sqlite.Database(dbPath);
+
+function exec(sql) {
+  return new Promise((resolve, reject) => {
+    db.exec(sql, (error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve();
+    });
+  });
+}
+
+function run(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.run(sql, params, function handleRun(error) {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve({ lastID: this.lastID, changes: this.changes });
+    });
+  });
+}
+
+function get(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.get(sql, params, (error, row) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve(row);
+    });
+  });
+}
+
+function all(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.all(sql, params, (error, rows) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve(rows);
+    });
+  });
+}
 
 function hashPassword(password, salt = randomBytes(16).toString('hex')) {
   const hash = pbkdf2Sync(password, salt, 120000, 32, 'sha256').toString('hex');
@@ -22,8 +74,9 @@ export function verifyPassword(password, user) {
   return timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(user.password_hash, 'hex'));
 }
 
-export function initializeDatabase() {
-  db.exec(`
+export async function initializeDatabase() {
+  await exec('PRAGMA foreign_keys = ON');
+  await exec(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT NOT NULL UNIQUE,
@@ -54,38 +107,37 @@ export function initializeDatabase() {
     );
   `);
 
-  const row = db.prepare('SELECT COUNT(*) AS total FROM users').get();
+  const row = await get('SELECT COUNT(*) AS total FROM users');
   if (isNewDatabase || row.total === 0) {
-    seedDatabase();
+    await seedDatabase();
   }
 }
 
-function seedDatabase() {
+async function seedDatabase() {
   const users = [
     ['alice', 'Alice Blue', 'password'],
     ['bruno', 'Bruno Red', 'password'],
     ['carla', 'Carla Green', 'password'],
   ];
 
-  const insertUser = db.prepare(
-    'INSERT INTO users (username, name, password_hash, salt) VALUES (?, ?, ?, ?)'
-  );
-
-  users.forEach(([username, name, password]) => {
+  for (const [username, name, password] of users) {
     const { hash, salt } = hashPassword(password);
-    insertUser.run(username, name, hash, salt);
-  });
+    await run(
+      'INSERT INTO users (username, name, password_hash, salt) VALUES (?, ?, ?, ?)',
+      [username, name, hash, salt]
+    );
+  }
 
-  const alice = getUserByUsername('alice');
-  const bruno = getUserByUsername('bruno');
+  const alice = await getUserByUsername('alice');
+  const bruno = await getUserByUsername('bruno');
 
-  insertSeedResult(alice.id, 'Easy', 'won');
-  insertSeedResult(alice.id, 'Intermediate', 'lost');
-  insertSeedResult(bruno.id, 'Easy', 'lost');
-  insertSeedResult(bruno.id, 'Hard', 'won');
+  await insertSeedResult(alice.id, 'Easy', 'won');
+  await insertSeedResult(alice.id, 'Intermediate', 'lost');
+  await insertSeedResult(bruno.id, 'Easy', 'lost');
+  await insertSeedResult(bruno.id, 'Hard', 'won');
 }
 
-function insertSeedResult(userId, difficulty, status) {
+async function insertSeedResult(userId, difficulty, status) {
   /*const state = {
     difficulty,
     size: difficulty === 'Hard' ? 15 : difficulty === 'Intermediate' ? 10 : 5,
@@ -97,42 +149,42 @@ function insertSeedResult(userId, difficulty, status) {
     status,
   };*/
 
-  db.prepare(`
+  await run(`
     INSERT INTO matches (user_id, mode, difficulty, status)
     VALUES (?, 'casual', ?, ?)
-  `).run(userId, difficulty, status);
+  `, [userId, difficulty, status]);
 }
 
 export function getUserByUsername(username) {
-  return db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+  return get('SELECT * FROM users WHERE username = ?', [username]);
 }
 
 export function getUserById(id) {
-  return db.prepare('SELECT id, username, name FROM users WHERE id = ?').get(id);
+  return get('SELECT id, username, name FROM users WHERE id = ?', [id]);
 }
 
 export function createTournament({ code, difficulty, seed, createdBy }) {
-  db.prepare(`
+  return run(`
     INSERT INTO tournaments (code, difficulty, seed, created_by)
     VALUES (?, ?, ?, ?)
-  `).run(code, difficulty, seed, createdBy);
+  `, [code, difficulty, seed, createdBy]);
 }
 
 export function getTournament(code) {
-  return db.prepare('SELECT * FROM tournaments WHERE code = ?').get(code);
+  return get('SELECT * FROM tournaments WHERE code = ?', [code]);
 }
 
-export function createStoredMatch({ userId = null, mode, difficulty, tournamentCode = null, state }) {
-  const result = db.prepare(`
+export async function createStoredMatch({ userId = null, mode, difficulty, tournamentCode = null, state }) {
+  const result = await run(`
     INSERT INTO matches (user_id, mode, difficulty, tournament_code, status)
     VALUES (?, ?, ?, ?, ?)
-  `).run(userId, mode, difficulty, tournamentCode, state.status);
+  `, [userId, mode, difficulty, tournamentCode, state.status]);
 
-  return Number(result.lastInsertRowid);
+  return Number(result.lastID);
 }
 
-export function getMatch(id) {
-  const row = db.prepare('SELECT * FROM matches WHERE id = ?').get(id);
+export async function getMatch(id) {
+  const row = await get('SELECT * FROM matches WHERE id = ?', [id]);
   if (!row) return null;
   return {
     ...row,
@@ -141,15 +193,15 @@ export function getMatch(id) {
 }
 
 /*export function updateMatch(id, state) {
-  db.prepare(`
+  run(`
     UPDATE matches
     SET status = ?, completed_at = CASE WHEN ? <> 'playing' THEN CURRENT_TIMESTAMP ELSE completed_at END
     WHERE id = ?
-  `).run(state.status, state.status, id);
+  `, [state.status, state.status, id]);
 }*/
 
-export function getPublicStats() {
-  return db.prepare(`
+export async function getPublicStats() {
+  const rows = await all(`
     SELECT
       u.username,
       u.name,
@@ -161,7 +213,9 @@ export function getPublicStats() {
     LEFT JOIN matches m ON m.user_id = u.id AND m.status IN ('won', 'lost')
     GROUP BY u.id, m.difficulty
     ORDER BY u.username, m.difficulty
-  `).all().map((row) => ({
+  `);
+
+  return rows.map((row) => ({
     ...row,
     difficulty: row.difficulty ?? 'No games yet',
     played: Number(row.played ?? 0),

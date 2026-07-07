@@ -23,13 +23,11 @@ import {
   normalizeDifficulty,
   publicMatch,
 } from './game.js';
-import {Match} from './models.js';
+import { Match } from './models.js';
 
 const app = express();
 const PORT = 3001;
 const CLIENT_ORIGIN = 'http://localhost:5173';
-
-initializeDatabase();
 
 app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }));
 app.use(express.json());
@@ -43,21 +41,21 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 passport.use(new LocalStrategy((username, password, done) => {
-  try {
-    const user = getUserByUsername(username);
-    if (!user || !verifyPassword(password, user)) {
-      return done(null, false, { message: 'Invalid username or password' });
-    }
-    return done(null, { id: user.id, username: user.username, name: user.name });
-  } catch (error) {
-    return done(error);
-  }
+  getUserByUsername(username)
+    .then((user) => {
+      if (!user || !verifyPassword(password, user)) {
+        return done(null, false, { message: 'Invalid username or password' });
+      }
+      return done(null, { id: user.id, username: user.username, name: user.name });
+    })
+    .catch(done);
 }));
 
 passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser((id, done) => {
-  const user = getUserById(id);
-  done(null, user ?? false);
+  getUserById(id)
+    .then((user) => done(null, user ?? false))
+    .catch(done);
 });
 
 function requireLogin(req, res, next) {
@@ -83,11 +81,11 @@ function loadMatchForRequest(req, id) {
     return req.session.anonymousMatches?.[id] ?? null;
   }*/
   //completare la gestione del match in sessione e non più in db
- /*const match = getMatch(id);
+  /*const match = getMatch(id);
   if (!match) return null;
   if (match.user_id && (!req.user || match.user_id !== req.user.id)) return 'forbidden';
   return match;*/
-    return req.session.matches?.[id] ?? null;
+  return req.session.matches?.[id] ?? null;
 }
 
 /*function saveMatchForRequest(req, match) {
@@ -119,9 +117,9 @@ app.get('/api/difficulties', (req, res) => {
   res.json(getDifficulties());
 });
 
-app.get('/api/stats', (req, res) => {
-  res.json(getPublicStats());
-});
+app.get('/api/stats', asyncHandler(async (req, res) => {
+  res.json(await getPublicStats());
+}));
 
 app.post('/api/matches', asyncHandler(async (req, res) => {
   const { difficulty, mode = 'casual', tournamentCode } = req.body;
@@ -140,14 +138,14 @@ app.post('/api/matches', asyncHandler(async (req, res) => {
 
   if (mode === 'tournament') {
     if (tournamentCode) {
-      const tournament = getTournament(String(tournamentCode).trim().toUpperCase());
+      const tournament = await getTournament(String(tournamentCode).trim().toUpperCase());
       if (!tournament) return res.status(404).json({ error: 'Tournament not found' });
       state = createMatchState(tournament.difficulty, tournament.seed);
       code = tournament.code;
     } else {
       code = makeCode();
       const seed = randomBytes(8).toString('hex');
-      createTournament({ code, difficulty: validDifficulty, seed, createdBy: req.user.id });
+      await createTournament({ code, difficulty: validDifficulty, seed, createdBy: req.user.id });
       state = createMatchState(validDifficulty, seed);
     }
   } else {
@@ -172,7 +170,7 @@ app.get('/api/matches/:id', (req, res) => {
   res.json(publicMatch(match));
 });
 
-app.post('/api/matches/:id/shots', (req, res) => {
+app.post('/api/matches/:id/shots', asyncHandler(async (req, res) => {
   const match = loadMatchForRequest(req, req.params.id);
   if (match === 'forbidden') return res.status(403).json({ error: 'Forbidden' });
   if (!match) return res.status(404).json({ error: 'Match not found' });
@@ -180,8 +178,8 @@ app.post('/api/matches/:id/shots', (req, res) => {
   const row = Number(req.body.row);
   const col = Number(req.body.col);
   const result = launchTorpedo(match.state, row, col);
-  if (result.status != "playing" && req.user){
-     const id = createStoredMatch({
+  if (result.status !== 'playing' && req.user) {
+    await createStoredMatch({
       userId: req.user.id,
       mode: match.mode,
       difficulty: match.state.difficulty,
@@ -191,13 +189,20 @@ app.post('/api/matches/:id/shots', (req, res) => {
   }
   rememberMatch(req, match);
   res.json({ ...result, match: publicMatch(match) });
-});
+}));
 
 app.use((error, req, res, next) => {
   console.error(error);
   res.status(400).json({ error: error.message || 'Unexpected error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Battleship API listening on http://localhost:${PORT}`);
-});
+initializeDatabase()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Battleship API listening on http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Failed to initialize database:', error);
+    process.exit(1);
+  });

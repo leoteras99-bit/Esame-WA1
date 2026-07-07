@@ -4,20 +4,28 @@ import { MatchState } from './models.js';
 const DIFFICULTIES = {
   Easy: {
     size: 5,
-    ships: [2, 2, 2,],
+    shipCount: 3,
+    minShipSize: 2,
+    maxShipSize: 5,
     torpedoes: 10,
   },
   Intermediate: {
     size: 10,
-    ships: [2, 2, 3, 3, 4, 5],
+    shipCount: 6,
+    minShipSize: 2,
+    maxShipSize: 5,
     torpedoes: 25,
   },
   Hard: {
     size: 15,
-    ships: [2, 2, 3, 3, 3, 4, 4, 5, 5, 5],
+    shipCount: 10,
+    minShipSize: 2,
+    maxShipSize: 5,
     torpedoes: 38,
   },
 };
+
+const MAX_FLEET_GENERATION_ATTEMPTS = 100;
 
 function makeRng(seed) {
   let state = seed ? hashSeed(seed) : Math.floor(Math.random() * 2147483647);
@@ -38,6 +46,16 @@ function hashSeed(seed) {
 
 function randomInt(rng, max) {
   return Math.floor(rng() * max);
+}
+
+function randomShipLength(rng, min, max) {
+  return min + randomInt(rng, max - min + 1);
+}
+
+function createShipSizes(level, rng) {
+  return Array.from({ length: level.shipCount }, () =>
+    randomShipLength(rng, level.minShipSize, level.maxShipSize)
+  );
 }
 
 
@@ -117,11 +135,28 @@ function placeShips(size, shipSizes, rng) {
   return { grid, ships };
 }
 
+function createFleet(level, rng) {
+  for (let attempt = 0; attempt < MAX_FLEET_GENERATION_ATTEMPTS; attempt += 1) {
+    const shipSizes = createShipSizes(level, rng);
+
+    try {
+      return placeShips(level.size, shipSizes, rng);
+    } catch (error) {
+      if (attempt === MAX_FLEET_GENERATION_ATTEMPTS - 1) {
+        throw error;
+      }
+    }
+  }
+
+  throw new Error('Unable to place all ships for this difficulty');
+}
+
 export function getDifficulties() {
   return Object.entries(DIFFICULTIES).map(([name, value]) => ({
     name,
     size: value.size,
-    ships: value.ships,
+    shipCount: value.shipCount,
+    ships: Array.from({ length: value.shipCount }),
     torpedoes: value.torpedoes,
   }));
 }
@@ -136,7 +171,7 @@ export function normalizeDifficulty(difficulty) {
 export function createMatchState(difficulty, seed = null) {
   const level = DIFFICULTIES[normalizeDifficulty(difficulty)];
   const rng = makeRng(seed);
-  const { grid, ships } = placeShips(level.size, level.ships, rng);
+  const { grid, ships } = createFleet(level, rng);
 
   return new MatchState(difficulty, level.size, level.torpedoes, grid, ships);
 }

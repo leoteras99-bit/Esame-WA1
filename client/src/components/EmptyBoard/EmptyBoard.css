@@ -1,0 +1,9 @@
+.emptyBoard {
+  display: grid;
+  place-items: center;
+  min-height: 460px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 8px;
+  color: #64748b;
+  font-weight: 800;
+}

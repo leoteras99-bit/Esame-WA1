@@ -25,7 +25,6 @@
   display: grid;
   gap: 4px;
   width: 100%;
-  max-width: 650px;
   aspect-ratio: 1;
   padding: 8px;
   background: #0f172a;
@@ -116,3 +115,34 @@
 .statusBadge.lost {
   background: #b91c1c;
 }
+
+
+.boardContainer {
+  position: relative;
+  max-width: 650px;
+}
+
+.boardOverlay {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(50, 50, 50, 0.55);
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  border-radius: 8px;
+  z-index: 10;
+}
+
+.board {
+  transition: filter 0.2s;
+}
+
+.board {
+  transition: filter 0.2s;
+}
+

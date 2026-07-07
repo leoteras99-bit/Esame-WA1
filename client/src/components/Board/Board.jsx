@@ -49,15 +49,23 @@ function Board({ match, onShoot }) {
           {match.status === 'playing'? `${match.torpedoes} torpedoes`: match.status.toUpperCase()}
         </div>
       </div>
-      <div
-        className="board"
-        style={{
-          gridTemplateColumns: 'repeat(' + match.size + ', minmax(0, 1fr))',
-          gridTemplateRows: 'repeat(' + match.size + ', minmax(0, 1fr))',
-        }}
-      >
-        {cells}
+      <div className="boardContainer">
+        {match.status !== 'playing' && (
+          <div className="boardOverlay">
+            {match.status === 'won' ? '🏆 You Won!' : '💥 Game Over'}
+          </div>
+        )}
+        <div
+          className="board"
+          style={{
+            gridTemplateColumns: 'repeat(' + match.size + ', minmax(0, 1fr))',
+            gridTemplateRows: 'repeat(' + match.size + ', minmax(0, 1fr))',
+          }}
+        >
+          {cells}
+        </div>
       </div>
+
     </>
   );
 }

@@ -5,14 +5,13 @@ function MatchHeader({ match, message }) {
     <div className="matchHeader">
       <div>
         <h1>{match ? match.difficulty + ' Match' : 'Ready Room'}</h1>
-        <h1>{match?.tournamentCode || ''}</h1>
+        {match?.tournamentCode && (
+          <h2 className="tournamentCode">
+            Tournament: {match.tournamentCode}
+          </h2>
+        )}
         <p>{message}</p>
       </div>
-      {match && (
-        <div className={'statusBadge ' + match.status}>
-          {match.status === 'playing' ? match.torpedoes + ' torpedoes' : match.status.toUpperCase()}
-        </div>
-      )}
     </div>
   );
 }

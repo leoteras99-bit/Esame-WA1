@@ -2,7 +2,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
 .fleetRow span {
@@ -25,7 +25,7 @@
   display: grid;
   gap: 4px;
   width: 100%;
-  max-width: 760px;
+  max-width: 650px;
   aspect-ratio: 1;
   padding: 8px;
   background: #0f172a;
@@ -88,4 +88,31 @@
 .cell.revealed {
   background: #64748b;
   color: #ffffff;
+}
+
+
+.boardInfo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+
+.statusBadge {
+  min-width: 132px;
+  text-align: center;
+  border-radius: 6px;
+  color: #ffffff;
+  background: #0369a1;
+  padding: 10px 12px;
+  font-weight: 900;
+  margin-left: auto;
+}
+
+.statusBadge.won {
+  background: #15803d;
+}
+
+.statusBadge.lost {
+  background: #b91c1c;
 }

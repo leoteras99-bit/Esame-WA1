@@ -37,10 +37,17 @@ function Board({ match, onShoot }) {
 
   return (
     <>
-      <div className="fleetRow">
-        {match.ships.map((ship) => (
-          <span key={ship.id} className={ship.sunk ? 'sunkShip' : ''}>Ship {ship.length}</span>
-        ))}
+      <div className="boardInfo">
+        <div className="fleetRow">
+          {match.ships.map((ship) => (
+            <span key={ship.id} className={ship.sunk ? 'sunkShip' : ''}>
+              Ship {ship.length}
+            </span>
+          ))}
+        </div>
+        <div className={'statusBadge ' + match.status}>
+          {match.status === 'playing'? `${match.torpedoes} torpedoes`: match.status.toUpperCase()}
+        </div>
       </div>
       <div
         className="board"

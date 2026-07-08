@@ -1,5 +1,5 @@
-import { Ship } from './models.js';
-import { MatchState } from './models.js';
+import { Ship,MatchState,Cell  } from './models.js';
+
 
 const DIFFICULTIES = {
   Easy: {
@@ -7,21 +7,21 @@ const DIFFICULTIES = {
     shipCount: 3,
     minShipSize: 2,
     maxShipSize: 5,
-    torpedoes: 10,
+    torpedoes: 8,
   },
   Intermediate: {
     size: 10,
     shipCount: 6,
     minShipSize: 2,
     maxShipSize: 5,
-    torpedoes: 25,
+    torpedoes: 30,
   },
   Hard: {
     size: 15,
     shipCount: 10,
     minShipSize: 2,
     maxShipSize: 5,
-    torpedoes: 38,
+    torpedoes: 70,
   },
 };
 
@@ -62,7 +62,7 @@ function createShipSizes(level, rng) {
 //create a Grid composed of cells where every cell can have a shipId and a shot flag
 function emptyGrid(size) {
   return Array.from({ length: size }, () =>
-    Array.from({ length: size }, () => ({ shipId: null, shot: false }))
+    Array.from({ length: size }, () => (new Cell({ shipId: null, shot: false })))
   );
 }
 
@@ -156,7 +156,7 @@ export function getDifficulties() {
     name,
     size: value.size,
     shipCount: value.shipCount,
-    ships: Array.from({ length: value.shipCount }),
+    //ships: Array.from({ length: value.shipCount }),
     torpedoes: value.torpedoes,
   }));
 }

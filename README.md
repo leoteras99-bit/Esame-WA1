@@ -213,7 +213,7 @@ Response Body:
 ## Overall
 
 ### Screenshot
-- Match screenshot: add an image from the running app here after capturing a finished or in-progress match.
+![image](img\Screenshot-BattleShipExam.png)
 
 ### Seeded users
 - `alice / password`

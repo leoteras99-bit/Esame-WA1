@@ -5,6 +5,8 @@
 ### HTTP APIs
 - `GET /api/session`: returns the current logged-in user or null.
 ```
+Response Code: 200 OK
+
 Response Body if user is  logged:
 {
   "user": {
@@ -12,10 +14,6 @@ Response Body if user is  logged:
     "username": "alice",
     "name": "Alice Blue"
   }
-}
-else:
-{
-  "user": null
 }
 ```
 - `POST /api/login`: logs in with Passport local strategy using `username` and `password`.
@@ -30,7 +28,7 @@ Request body:
 
 Description: Logs in the user.
 
-Response: 201 Created (user) or 401 Not authorized.
+Response: 201 Created (user) 
 
 Response body:
 
@@ -47,10 +45,21 @@ Failure:
 401 Unauthorized
 
 ```
-- `POST /api/logout`: ends the current session.
+- `POST /api/logout`: ends the current session.:
+```
+
+Response: 204 No Content
+
+in case of Error
+
+400 Bad Request
+{ "error": 'Unexpected error' }
+```
+
 
 - `GET /api/difficulties`: returns the supported difficulty levels, grid sizes, ship lists, and torpedo counts.:
 ```
+Responde: 200 OK
 Response body:
 
 [
@@ -78,9 +87,9 @@ Request Body:
 Casual Game:
 
 {
-          "difficulty": String,
-          "mode": String,
-          "tournamentCode": String or null,    
+          "difficulty": Easy,
+          "mode": casual,
+          "tournamentCode": null,    
 }
 
 Response :201 Created
@@ -106,29 +115,41 @@ Response Body
     "status":"playing",
     "reveal":null
 }
+Failure:
+400 Bad Request	Invalid difficulty (thrown by normalizeDifficulty()) or invalid match mode.
+401 Unauthorized	Tournament mode requested by a non-logged-in user.
+404 Not Found	Tournament code does not exist.
 ``` 
 - `GET /api/matches/:id`: returns the current public match state.:
 ```
+Response:200 OK
 
 Response Body
 
 {
-    "id":String,
-    "mode":String,
-    "tournamentCode":null,  
-    "difficulty":String,
-    "size":Int,
-    "torpedoes":Int,
+    
+    "id":"A93F5C2D",
+    "mode":"casual",
+    "tournamentCode":null,
+    "difficulty":"Easy",
+    "size":5,
+    "torpedoes":10,
+    "initialTorpedoes":10,
     "ships":[
         {
-            "id": Int,
-            "length": Int,
-            "sunk":Boolean
+            "id":0,
+            "length":2,
+            "sunk":false
         }
     ],
     "shots":[],
-    "status":String,
-    "reveal":[];
+    "status":"playing",
+    "reveal":null
+
+Failure:
+403 Forbidden User is not allowed to access the match (currently never happens because the check is commented out).
+404 Not Found	Match not found in the session.
+
 }
 ``` 
 - `POST /api/matches/:id/shots`: launches a torpedo at `row` and `col`.:
@@ -139,6 +160,7 @@ Request Body:
     "col":4
 }
 
+Response : 200 OK
 Response Body:
 {
 "shot": {
@@ -155,10 +177,16 @@ Response Body:
       ...
   }
 }
+Failure:
+403 Forbidden	User is not allowed to access the match (currently never happens because the check is commented out).
+404 Not Found	Match not found.
+400 Bad Request	Invalid coordinates, cell already shot, match already finished, or any other error thrown by launchTorpedo() or the DAO.
 ```
 - `GET /api/stats`: public leaderboard and per-user statistics.:
 
 ```
+Response : 200 OK
+
 Response Body:
 [
   {
@@ -189,6 +217,9 @@ Response Body:
     "winRate": 0
   }
 ]
+
+Failure:
+400 Bad Request
 ```
 
 ### Database tables
@@ -209,6 +240,7 @@ Response Body:
 - `PlayPage`: match creation and game view.
 - `Board`: clickable grid of cells.
 - `StatsPage`: public statistics table.
+- `DifficultyCard`: It's used to choose the difficulty
 
 ## Overall
 
